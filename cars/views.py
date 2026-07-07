@@ -1,6 +1,7 @@
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.db.models import Max
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
@@ -97,8 +98,21 @@ def panel_edit(request, pk):
         form = CarListingForm(request.POST, instance=car)
         if form.is_valid():
             form.save()
-            for i, f in enumerate(request.FILES.getlist("photos")):
-                CarImage.objects.create(listing=car, image=f, order=i)
+
+            # Remove photos the user checked for deletion. Deleting the
+            # CarImage rows also deletes the actual files from disk
+            # (see cars/signals.py).
+            delete_ids = request.POST.getlist("delete_photos")
+            if delete_ids:
+                CarImage.objects.filter(listing=car, id__in=delete_ids).delete()
+
+            # Append any newly uploaded photos after the existing ones.
+            new_files = request.FILES.getlist("photos")
+            if new_files:
+                next_order = (car.images.aggregate(m=Max("order"))["m"] or 0) + 1
+                for i, f in enumerate(new_files):
+                    CarImage.objects.create(listing=car, image=f, order=next_order + i)
+
             messages.success(request, "Объявление обновлено")
             return redirect("panel")
     else:

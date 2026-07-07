@@ -63,12 +63,27 @@
                     {{ form.description }}
                 </div>
             </div>
+            {% if mode == 'edit-form' and edit_car.images.all %}
+            <div class="existing-photos">
+                <p class="existing-photos-title">Текущие фото (отметьте, чтобы удалить при сохранении)</p>
+                <div class="existing-photos-grid">
+                    {% for img in edit_car.images.all %}
+                    <label class="existing-photo">
+                        <img src="{{ img.image.url }}" alt="">
+                        <input type="checkbox" name="delete_photos" value="{{ img.id }}">
+                        <span class="existing-photo-remove">✕</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <div class="car-form-footer">
                 <label class="file-field">
                     <input type="file" name="photos" multiple accept="image/*">
-                    <span>Фото</span>
+                    <span>{% if mode == 'edit-form' %}Добавить фото{% else %}Фото{% endif %}</span>
                 </label>
-                <button type="submit" class="btn btn-green">Добавить</button>
+                <button type="submit" class="btn btn-green">{% if mode == 'edit-form' %}Сохранить{% else %}Добавить{% endif %}</button>
             </div>
         </form>
 
