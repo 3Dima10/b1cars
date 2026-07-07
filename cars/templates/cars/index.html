@@ -1,0 +1,30 @@
+{% extends "cars/base.html" %}
+{% load static car_extras %}
+{% block content %}
+<section class="listing-grid">
+    {% for car in cars %}
+    <a href="{% url 'car_detail' car.pk %}" class="car-card" style="animation-delay: {{ forloop.counter0|add:0 }}0ms">
+        <div class="car-card-media">
+            {% if car.main_image %}
+                <img src="{{ car.main_image }}" alt="{{ car.title }}" loading="lazy">
+            {% endif %}
+            <span class="badge">auto</span>
+        </div>
+        <div class="car-card-body">
+            <div class="car-card-title">
+                <span class="name">{{ car.title }}</span>
+                <span class="year">{{ car.year }}</span>
+            </div>
+            <div class="car-card-price">{{ car.price|spacegroup }} $</div>
+            <div class="car-card-meta">
+                <span>{{ car.mileage|spacegroup }} км</span>
+                <span>{{ car.fuel_type }}</span>
+                <span>{{ car.city }}</span>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <p class="empty-state">Пока нет автомобилей в наличии. Загляните позже.</p>
+    {% endfor %}
+</section>
+{% endblock %}

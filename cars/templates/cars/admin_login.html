@@ -1,0 +1,14 @@
+{% extends "cars/base.html" %}
+{% block title %}Вход — {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="login-page">
+    <form method="post" class="login-form">
+        {% csrf_token %}
+        <h1>Вход в админку</h1>
+        {% if error %}<p class="login-error">{{ error }}</p>{% endif %}
+        <input type="text" name="username" placeholder="Логин" class="field" autofocus required>
+        <input type="password" name="password" placeholder="Пароль" class="field" required>
+        <button type="submit" class="btn btn-green">Войти</button>
+    </form>
+</section>
+{% endblock %}

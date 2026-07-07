@@ -1,0 +1,85 @@
+{% extends "cars/base.html" %}
+{% load static car_extras %}
+{% block extra_head %}
+<style>
+  @media (max-width: 900px) {
+    .detail-page { display:flex !important; flex-direction:column !important; padding:10px 18px 30px !important; gap:20px !important; }
+    .detail-gallery, .detail-info { width:100% !important; min-width:0 !important; }
+    .detail-info { grid-column:unset !important; }
+    .gallery-main { aspect-ratio:auto !important; min-height:240px !important; }
+    .gallery-thumbs { display:flex !important; gap:10px !important; margin-top:12px !important; overflow-x:auto !important; padding-bottom:8px !important; }
+    .gallery-thumbs::-webkit-scrollbar { height:8px; }
+    .gallery-thumbs::-webkit-scrollbar-thumb { background:rgba(255,255,255,.18); border-radius:999px; }
+    .thumb-btn { min-width:90px !important; width:auto !important; }
+    .detail-info { gap:18px !important; }
+    .info-specs { grid-template-columns:1fr !important; }
+    .contact-btn { width:100% !important; }
+    .detail-description { padding-top:20px !important; }
+  }
+</style>
+{% endblock %}
+{% block title %}{{ car.title }} {{ car.year }} — {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="detail-page">
+    <div class="detail-gallery">
+        <div class="gallery-main">
+            {% if car.images.all %}
+                <img id="mainImage" src="{{ car.images.first.image.url }}" alt="{{ car.title }}">
+            {% endif %}
+            <span class="badge badge-lg">auto</span>
+        </div>
+        {% if car.images.count > 1 %}
+        <div class="gallery-thumbs">
+            {% for img in car.images.all %}
+            <button class="thumb-btn {% if forloop.first %}active{% endif %}" data-src="{{ img.image.url }}">
+                <img src="{{ img.image.url }}" alt="thumb">
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="detail-info">
+        <div class="info-card">
+            <div class="info-title">
+                <span class="name">{{ car.title }}</span>
+                <span class="year">{{ car.year }}</span>
+            </div>
+            <div class="info-price">{{ car.price|spacegroup }} $</div>
+            <hr class="divider">
+            <div class="info-specs">
+                <div class="spec"><span class="spec-icon">&#9201;</span> {{ car.mileage|spacegroup }} км</div>
+                <div class="spec"><span class="spec-icon">&#9981;</span> {{ car.fuel_type }}</div>
+                <div class="spec"><span class="spec-icon">&#9968;</span> {{ car.drive_type }}</div>
+                <div class="spec"><span class="spec-icon">&#128205;</span> {{ car.city }}</div>
+            </div>
+            {% if car.vin_code %}
+            <div class="vin-chip">{{ car.vin_code }}</div>
+            {% endif %}
+        </div>
+
+        <a href="{{ settings.phone_url }}" class="contact-btn phone-btn">
+            <span class="phone-icon">&#128222;</span> {{ settings.phone }}
+        </a>
+        <a href="{{ settings.telegram_url }}" target="_blank" rel="noopener" class="contact-btn telegram-btn">
+            {{ settings.telegram }}
+        </a>
+    </div>
+
+    <div class="detail-description">
+        {{ car.description|linebreaksbr }}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.thumb-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        document.getElementById('mainImage').src = this.dataset.src;
+        document.querySelectorAll('.thumb-btn').forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+    });
+});
+</script>
+{% endblock %}

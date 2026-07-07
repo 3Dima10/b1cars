@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{{ settings.site_name }} — авто в наличии{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+    <a href="{% url 'home' %}" class="logo">{{ settings.site_name }}</a>
+
+    <!-- <div class="header-avatar">
+        {% if settings.avatar %}
+            <img src="{{ settings.avatar.url }}" alt="avatar" class="avatar-img">
+        {% else %}
+            <span class="avatar-circle"></span>
+        {% endif %}
+    </div> -->
+
+    <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<div class="side-menu" id="sideMenu">
+    <div class="side-menu-inner">
+        <button class="side-menu-close" id="sideMenuClose" aria-label="Закрыть">&times;</button>
+        <nav class="side-menu-links">
+            {% if request.user.is_authenticated and request.user.is_staff %}
+                <a href="{% url 'panel' %}" class="side-link admin-link">Admin</a>
+                <a href="{% url 'admin_logout' %}" class="side-link logout-link">Выйти</a>
+            {% else %}
+                <a href="{% url 'admin_login' %}" class="side-link admin-link">Admin</a>
+            {% endif %}
+        </nav>
+    </div>
+</div>
+<div class="side-menu-backdrop" id="sideMenuBackdrop"></div>
+
+<main class="page-fade-in">
+{% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">{{ settings.site_name }}</div>
+        <a href="{{ settings.phone_url }}" class="footer-contact">{{ settings.phone }}</a>
+        <a href="{{ settings.telegram_url }}" target="_blank" rel="noopener" class="footer-contact">{{ settings.telegram }}</a>
+        <div class="footer-copy">&copy; {% now "Y" %} {{ settings.site_name }}. Все права защищены.</div>
+    </div>
+</footer>
+
+<script>
+(function () {
+    // Telegram Mini App deep-link handler.
+    // Ссылка вида https://t.me/BOT_USERNAME/APP_NAME?startapp=car_5
+    // открывает Mini App и передаёт "car_5" в start_param — по нему редиректим
+    // на нужную страницу сайта (например /car/5/).
+    if (window.Telegram && window.Telegram.WebApp) {
+        var tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        var startParam = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+        if (startParam) {
+            var match = startParam.match(/^car_(\d+)$/);
+            if (match) {
+                var targetPath = "/car/" + match[1] + "/";
+                if (window.location.pathname !== targetPath) {
+                    window.location.replace(targetPath);
+                }
+            }
+        }
+    }
+})();
+</script>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

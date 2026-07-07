@@ -1,0 +1,119 @@
+{% extends "cars/base.html" %}
+{% load static car_extras %}
+{% block title %}Панель управления — {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+<section class="panel-top">
+    <form method="post" action="{% url 'panel_avatar' %}" enctype="multipart/form-data" id="avatarForm">
+        {% csrf_token %}
+        <label class="panel-avatar-wrap" title="Нажмите, чтобы изменить аватар">
+            {% if settings.avatar %}
+                <img src="{{ settings.avatar.url }}" class="panel-avatar-img" alt="avatar">
+            {% else %}
+                <span class="avatar-circle avatar-circle-lg"></span>
+            {% endif %}
+            <input type="file" name="avatar" accept="image/*" id="avatarInput" hidden onchange="document.getElementById('avatarForm').submit()">
+            <span class="avatar-edit-hint">изменить</span>
+        </label>
+    </form>
+
+    <div class="panel-actions">
+        <a href="{% url 'panel' %}?mode=create" class="btn btn-green {% if mode == 'create' %}active{% endif %}">Создать</a>
+        <a href="{% url 'panel' %}?mode=edit" class="btn btn-yellow {% if mode == 'edit' or mode == 'edit-form' %}active{% endif %}">Изменить</a>
+        <a href="{% url 'panel' %}?mode=delete" class="btn btn-red {% if mode == 'delete' %}active{% endif %}">Удалить</a>
+    </div>
+</section>
+
+{% if messages %}
+<div class="panel-messages">
+    {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+</div>
+{% endif %}
+
+{% if mode %}
+<div class="panel-overlay-backdrop" id="panelBackdrop"></div>
+<section class="panel-overlay" id="panelOverlay">
+    <div class="panel-overlay-head">
+        <h2>
+            {% if mode == 'create' %}Создать
+            {% elif mode == 'edit' %}Изменить
+            {% elif mode == 'edit-form' %}Изменить: {{ edit_car.title }}
+            {% elif mode == 'delete' %}Удалить
+            {% endif %}
+        </h2>
+        <a href="{% url 'panel' %}" class="panel-close" aria-label="Закрыть">&times;</a>
+    </div>
+
+    {% if mode == 'create' or mode == 'edit-form' %}
+        <form method="post"
+              action="{% if mode == 'create' %}{% url 'panel_create' %}{% else %}{% url 'panel_edit' edit_car.pk %}{% endif %}"
+              enctype="multipart/form-data" class="car-form">
+            {% csrf_token %}
+            <div class="car-form-grid">
+                <div class="col-left">
+                    {{ form.title }}
+                    {{ form.year }}
+                    {{ form.price }}
+                    {{ form.mileage }}
+                    {{ form.fuel_type }}
+                </div>
+                <div class="col-right">
+                    {{ form.drive_type }}
+                    {{ form.city }}
+                    {{ form.description }}
+                </div>
+            </div>
+            <div class="car-form-footer">
+                <label class="file-field">
+                    <input type="file" name="photos" multiple accept="image/*">
+                    <span>Фото</span>
+                </label>
+                <button type="submit" class="btn btn-green">Добавить</button>
+            </div>
+        </form>
+
+    {% elif mode == 'edit' %}
+        <div class="panel-grid">
+            {% for car in cars %}
+            <a href="{% url 'panel_edit' car.pk %}" class="car-card">
+                <div class="car-card-media">
+                    {% if car.main_image %}<img src="{{ car.main_image }}" alt="{{ car.title }}">{% endif %}
+                    <span class="badge">auto</span>
+                </div>
+                <div class="car-card-body">
+                    <div class="car-card-title"><span class="name">{{ car.title }}</span><span class="year">{{ car.year }}</span></div>
+                    <div class="car-card-price">{{ car.price|spacegroup }} $</div>
+                    <div class="car-card-meta"><span>{{ car.mileage|spacegroup }} км</span><span>{{ car.fuel_type }}</span><span>{{ car.city }}</span></div>
+                </div>
+            </a>
+            {% empty %}
+            <p class="empty-state">Нет объявлений</p>
+            {% endfor %}
+        </div>
+
+    {% elif mode == 'delete' %}
+        <div class="panel-grid">
+            {% for car in cars %}
+            <div class="car-card delete-card">
+                <div class="car-card-media">
+                    {% if car.main_image %}<img src="{{ car.main_image }}" alt="{{ car.title }}">{% endif %}
+                    <span class="badge">auto</span>
+                </div>
+                <div class="car-card-body">
+                    <div class="car-card-title"><span class="name">{{ car.title }}</span><span class="year">{{ car.year }}</span></div>
+                    <div class="car-card-price">{{ car.price|spacegroup }} $</div>
+                    <div class="car-card-meta"><span>{{ car.mileage|spacegroup }} км</span><span>{{ car.fuel_type }}</span><span>{{ car.city }}</span></div>
+                    <form method="post" action="{% url 'panel_delete' car.pk %}" onsubmit="return confirm('Удалить это объявление?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-red btn-small">Удалить</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-state">Нет объявлений</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}
