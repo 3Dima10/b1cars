@@ -7,6 +7,10 @@ class SiteSettings(models.Model):
     phone = models.CharField(max_length=30, default="+380000000000")
     telegram = models.CharField(max_length=100, default="@username",
                                  help_text="Telegram username, with or without @")
+    tiktok = models.CharField(max_length=100, blank=True,
+                               help_text="Ссылка на TikTok или @username")
+    instagram = models.CharField(max_length=100, blank=True,
+                                  help_text="Ссылка на Instagram или @username")
     avatar = models.ImageField(upload_to="avatar/", blank=True, null=True)
 
     class Meta:
@@ -35,6 +39,24 @@ class SiteSettings(models.Model):
         digits = "".join(ch for ch in self.phone if ch.isdigit() or ch == "+")
         return f"tel:{digits}"
 
+    @property
+    def tiktok_url(self):
+        value = (self.tiktok or "").strip()
+        if not value:
+            return ""
+        if value.startswith("http://") or value.startswith("https://"):
+            return value
+        return f"https://www.tiktok.com/@{value.lstrip('@')}"
+
+    @property
+    def instagram_url(self):
+        value = (self.instagram or "").strip()
+        if not value:
+            return ""
+        if value.startswith("http://") or value.startswith("https://"):
+            return value
+        return f"https://www.instagram.com/{value.lstrip('@')}"
+
     def __str__(self):
         return self.site_name
 
@@ -53,8 +75,36 @@ DRIVE_CHOICES = [
     ("Полный привод", "Полный привод"),
 ]
 
+BRAND_CHOICES = [
+    ("Audi", "Audi"),
+    ("BMW", "BMW"),
+    ("Chevrolet", "Chevrolet"),
+    ("Citroen", "Citroen"),
+    ("Fiat", "Fiat"),
+    ("Ford", "Ford"),
+    ("Honda", "Honda"),
+    ("Hyundai", "Hyundai"),
+    ("Kia", "Kia"),
+    ("Lexus", "Lexus"),
+    ("Mazda", "Mazda"),
+    ("Mercedes-Benz", "Mercedes-Benz"),
+    ("Mitsubishi", "Mitsubishi"),
+    ("Nissan", "Nissan"),
+    ("Opel", "Opel"),
+    ("Peugeot", "Peugeot"),
+    ("Renault", "Renault"),
+    ("Skoda", "Skoda"),
+    ("Subaru", "Subaru"),
+    ("Suzuki", "Suzuki"),
+    ("Toyota", "Toyota"),
+    ("Volkswagen", "Volkswagen"),
+    ("Volvo", "Volvo"),
+    ("Другое", "Другое"),
+]
+
 
 class CarListing(models.Model):
+    brand = models.CharField(max_length=60, choices=BRAND_CHOICES, default="BMW", verbose_name="Марка")
     title = models.CharField(max_length=150, verbose_name="Название")
     year = models.PositiveIntegerField(verbose_name="Год")
     price = models.PositiveIntegerField(verbose_name="Цена ($)")

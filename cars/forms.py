@@ -6,10 +6,11 @@ class CarListingForm(forms.ModelForm):
     class Meta:
         model = CarListing
         fields = [
-            "title", "year", "price", "mileage", "fuel_type",
+            "brand", "title", "year", "price", "mileage", "fuel_type",
             "drive_type", "city", "vin_code", "description",
         ]
         widgets = {
+            "brand": forms.Select(attrs={"class": "field"}),
             "title": forms.TextInput(attrs={"placeholder": "Название", "class": "field"}),
             "year": forms.NumberInput(attrs={"placeholder": "Год", "class": "field"}),
             "price": forms.NumberInput(attrs={"placeholder": "Цена", "class": "field"}),
@@ -37,4 +38,11 @@ class CarImagesForm(forms.Form):
 class SiteSettingsForm(forms.ModelForm):
     class Meta:
         model = SiteSettings
-        fields = ["site_name", "phone", "telegram", "avatar"]
+        fields = ["site_name", "phone", "telegram", "tiktok", "instagram", "avatar"]
+        widgets = {
+            "site_name": forms.TextInput(attrs={"placeholder": "Название сайта", "class": "field"}),
+            "phone": forms.TextInput(attrs={"placeholder": "Телефон", "class": "field"}),
+            "telegram": forms.TextInput(attrs={"placeholder": "@telegram", "class": "field"}),
+            "tiktok": forms.TextInput(attrs={"placeholder": "TikTok (ссылка или @username)", "class": "field"}),
+            "instagram": forms.TextInput(attrs={"placeholder": "Instagram (ссылка или @username)", "class": "field"}),
+        }

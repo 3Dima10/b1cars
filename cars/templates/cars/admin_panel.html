@@ -4,8 +4,10 @@
 
 {% block content %}
 <section class="panel-top">
-    <form method="post" action="{% url 'panel_avatar' %}" enctype="multipart/form-data" id="avatarForm">
+    <form method="post" action="{% url 'panel_avatar' %}" enctype="multipart/form-data" id="avatarForm" class="panel-settings-form">
         {% csrf_token %}
+        <input type="hidden" name="site_name" value="{{ settings.site_name }}">
+
         <label class="panel-avatar-wrap" title="Нажмите, чтобы изменить аватар">
             {% if settings.avatar %}
                 <img src="{{ settings.avatar.url }}" class="panel-avatar-img" alt="avatar">
@@ -15,6 +17,14 @@
             <input type="file" name="avatar" accept="image/*" id="avatarInput" hidden onchange="document.getElementById('avatarForm').submit()">
             <span class="avatar-edit-hint">изменить</span>
         </label>
+
+        <div class="panel-contacts-grid">
+            <input type="text" name="phone" class="field" placeholder="Телефон" value="{{ settings.phone }}">
+            <input type="text" name="telegram" class="field" placeholder="@telegram" value="{{ settings.telegram }}">
+            <input type="text" name="tiktok" class="field" placeholder="TikTok (ссылка или @username)" value="{{ settings.tiktok }}">
+            <input type="text" name="instagram" class="field" placeholder="Instagram (ссылка или @username)" value="{{ settings.instagram }}">
+            <button type="submit" class="btn btn-green btn-small">Сохранить контакты</button>
+        </div>
     </form>
 
     <div class="panel-actions">
@@ -51,6 +61,7 @@
             {% csrf_token %}
             <div class="car-form-grid">
                 <div class="col-left">
+                    {{ form.brand }}
                     {{ form.title }}
                     {{ form.year }}
                     {{ form.price }}

@@ -9,7 +9,9 @@ class CarImageInline(admin.TabularInline):
 
 @admin.register(CarListing)
 class CarListingAdmin(admin.ModelAdmin):
-    list_display = ("title", "year", "price", "city", "is_active", "created_at")
+    list_display = ("title", "brand", "year", "price", "mileage", "fuel_type", "drive_type", "city", "is_active", "created_at")
+    list_filter = ("brand", "fuel_type", "drive_type", "city", "is_active", "year")
+    search_fields = ("title", "brand", "vin_code", "city")
     inlines = [CarImageInline]
 
 

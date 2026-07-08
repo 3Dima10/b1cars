@@ -1,6 +1,78 @@
 {% extends "cars/base.html" %}
 {% load static car_extras %}
 {% block content %}
+
+<section class="filters-bar">
+    <button type="button" class="search-toggle-btn {% if filters_active %}active{% endif %}" id="filtersToggle" aria-expanded="false" aria-controls="filtersPanel">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.2" y2="16.2"/>
+        </svg>
+        <span>Поиск / Фильтры</span>
+        {% if filters_active %}<span class="filters-dot"></span>{% endif %}
+    </button>
+
+    <form method="get" action="{% url 'home' %}" class="filters-panel" id="filtersPanel">
+        <div class="filters-grid">
+            <label class="filter-field">
+                <span>Марка</span>
+                <select name="brand" class="field">
+                    <option value="">Любая</option>
+                    {% for value, label in brand_choices %}
+                    <option value="{{ value }}" {% if selected.brand == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="filter-field">
+                <span>Тип топлива</span>
+                <select name="fuel_type" class="field">
+                    <option value="">Любой</option>
+                    {% for value, label in fuel_choices %}
+                    <option value="{{ value }}" {% if selected.fuel_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="filter-field">
+                <span>Привод</span>
+                <select name="drive_type" class="field">
+                    <option value="">Любой</option>
+                    {% for value, label in drive_choices %}
+                    <option value="{{ value }}" {% if selected.drive_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="filter-field filter-field-range">
+                <span>Цена, $</span>
+                <div class="range-inputs">
+                    <input type="number" min="0" name="price_min" class="field" placeholder="от" value="{{ selected.price_min }}">
+                    <input type="number" min="0" name="price_max" class="field" placeholder="до" value="{{ selected.price_max }}">
+                </div>
+            </label>
+
+            <label class="filter-field filter-field-range">
+                <span>Год выпуска</span>
+                <div class="range-inputs">
+                    <input type="number" min="1950" name="year_min" class="field" placeholder="от" value="{{ selected.year_min }}">
+                    <input type="number" min="1950" name="year_max" class="field" placeholder="до" value="{{ selected.year_max }}">
+                </div>
+            </label>
+
+            <label class="filter-field">
+                <span>Пробег, км (до)</span>
+                <input type="number" min="0" name="mileage_max" class="field" placeholder="напр. 150000" value="{{ selected.mileage_max }}">
+            </label>
+        </div>
+
+        <div class="filters-actions">
+            <button type="submit" class="btn btn-green">Найти</button>
+            <a href="{% url 'home' %}" class="btn btn-reset">Сбросить</a>
+        </div>
+    </form>
+</section>
+
 <section class="listing-grid">
     {% for car in cars %}
     <a href="{% url 'car_detail' car.pk %}" class="car-card" style="animation-delay: {{ forloop.counter0|add:0 }}0ms">

@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from .forms import CarListingForm, SiteSettingsForm
-from .models import CarListing, CarImage, SiteSettings
+from .models import CarListing, CarImage, SiteSettings, BRAND_CHOICES, FUEL_CHOICES, DRIVE_CHOICES
 
 
 def is_admin(user):
@@ -19,7 +19,53 @@ def site_context():
 
 def home(request):
     cars = CarListing.objects.filter(is_active=True).prefetch_related("images")
-    context = {"cars": cars, **site_context()}
+
+    brand = request.GET.get("brand", "").strip()
+    fuel_type = request.GET.get("fuel_type", "").strip()
+    drive_type = request.GET.get("drive_type", "").strip()
+    price_min = request.GET.get("price_min", "").strip()
+    price_max = request.GET.get("price_max", "").strip()
+    year_min = request.GET.get("year_min", "").strip()
+    year_max = request.GET.get("year_max", "").strip()
+    mileage_max = request.GET.get("mileage_max", "").strip()
+
+    if brand:
+        cars = cars.filter(brand=brand)
+    if fuel_type:
+        cars = cars.filter(fuel_type=fuel_type)
+    if drive_type:
+        cars = cars.filter(drive_type=drive_type)
+    if price_min.isdigit():
+        cars = cars.filter(price__gte=int(price_min))
+    if price_max.isdigit():
+        cars = cars.filter(price__lte=int(price_max))
+    if year_min.isdigit():
+        cars = cars.filter(year__gte=int(year_min))
+    if year_max.isdigit():
+        cars = cars.filter(year__lte=int(year_max))
+    if mileage_max.isdigit():
+        cars = cars.filter(mileage__lte=int(mileage_max))
+
+    filters_active = any([brand, fuel_type, drive_type, price_min, price_max, year_min, year_max, mileage_max])
+
+    context = {
+        "cars": cars,
+        "brand_choices": BRAND_CHOICES,
+        "fuel_choices": FUEL_CHOICES,
+        "drive_choices": DRIVE_CHOICES,
+        "selected": {
+            "brand": brand,
+            "fuel_type": fuel_type,
+            "drive_type": drive_type,
+            "price_min": price_min,
+            "price_max": price_max,
+            "year_min": year_min,
+            "year_max": year_max,
+            "mileage_max": mileage_max,
+        },
+        "filters_active": filters_active,
+        **site_context(),
+    }
     return render(request, "cars/index.html", context)
 
 
